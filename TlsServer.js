@@ -1,10 +1,10 @@
 const fs = require('fs');
 const tls = require('tls');
-const port = 8000 || process.env.PORT;
+// const port = 8000 || process.env.PORT;
 
-const keyPath = '../certs/server1.key';
-const certPath = '../certs/server1.crt';
-const caPath = '../certs/ca.pem';
+// const keyPath = '../certs/server1.key';
+// const certPath = '../certs/server1.crt';
+// const caPath = '../certs/ca.pem';
 
 class TlsServer extends tls.Server {
   constructor(...props) {
@@ -76,13 +76,13 @@ class TlsServer extends tls.Server {
   }
 }
 
-
-const options = {
-  key: fs.readFileSync(keyPath),
-  cert: fs.readFileSync(certPath),
-  ca: fs.readFileSync(caPath),
-  requestCert: true,
-  rejectUnauthorized: true
-};
-const tlsServer = new TlsServer(options);
-tlsServer.listen(port, () => console.log(`bound on port ${port}`));
+module.exports = TlsServer;
+// const options = {
+//   key: fs.readFileSync(keyPath),
+//   cert: fs.readFileSync(certPath),
+//   ca: fs.readFileSync(caPath),
+//   requestCert: true,
+//   rejectUnauthorized: true
+// };
+// const tlsServer = new TlsServer(options);
+// tlsServer.listen(port, () => console.log(`bound on port ${port}`));

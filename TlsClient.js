@@ -2,9 +2,9 @@ const tls = require('tls');
 const fs = require('fs');
 const events = require('events');
 
-const keyPath = `../certs/client.key`;
-const certPath = `../certs/client.crt`;
-const caPath = `../certs/ca.pem`;
+// const keyPath = `../certs/client.key`;
+// const certPath = `../certs/client.crt`;
+// const caPath = `../certs/ca.pem`;
 
 
 class TlsClient extends events {
@@ -128,11 +128,13 @@ class TlsClient extends events {
   }
 }
 
-const tlsClient = new TlsClient({host: '127.0.0.1', port: 8000, keyPath, certPath, caPath});
+// const tlsClient = new TlsClient({host: '127.0.0.1', port: 8000, keyPath, certPath, caPath});
+//
+// ;(async () => {
+//   // for (let i = 0; i < 100000; i++) {
+//   //   tlsClient.sendData({hello: 'bla'});
+//   // }
+//    await tlsClient.sendData({hello: 'bla'});
+// })();
 
-;(async () => {
-  // for (let i = 0; i < 100000; i++) {
-  //   tlsClient.sendData({hello: 'bla'});
-  // }
-   await tlsClient.sendData({hello: 'bla'});
-})();
+module.exports = TlsClient;

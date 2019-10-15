@@ -1,0 +1,26 @@
+{
+  "name": "tlsclientserver",
+  "version": "1.0.0",
+  "description": "Node js TLS Server and Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexgev/tlsClientServer.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "tls",
+    "client",
+    "server"
+  ],
+  "author": "Alexey Gevorkyan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexgev/tlsClientServer/issues"
+  },
+  "homepage": "https://github.com/alexgev/tlsClientServer#readme"
+}
