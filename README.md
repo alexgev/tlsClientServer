@@ -1,6 +1,6 @@
 # tlsClientServer
 Node js TLS Server and Client
-```$xslt
+```javascript
 const {TlsServer, TlsClient} = require('tlsclientserver');
 const fs = require('fs');
 
