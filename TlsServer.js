@@ -36,8 +36,9 @@ class TlsServer extends tls.Server {
         if (!json) continue;
         obj = JSON.parse(json);
         console.log('objFromReq', obj);
-        if (!obj[this._taskIdField] || !obj[this._methodField]) return this._badRequest(socket);
+        if (!obj[this._taskIdField]) return this._badRequest(socket);
         const taskId = this._getTaskIdFromObj(obj);
+        if (!obj[this._methodField]) return this._badRequest(socket, taskId);
         const routePath = obj[this._methodField];
         let routeFunc = this._routeMap.get(routePath);
         if (!routeFunc) return this._badRequest(socket, taskId, `Not found "${routePath}" in routes`);
