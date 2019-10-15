@@ -16,7 +16,7 @@ class TlsServer extends tls.Server {
       this.listeningFunc(socket);
       // socket.write('hello\n');
     })
-    this.on('error', err => console.log('err', err));
+    this.on('error', err => console.error('Error on server', err));
   }
   listeningFunc(socket) {
     socket.on('data', (data) => this._parseDataFromClient(socket, data));

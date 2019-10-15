@@ -15,9 +15,9 @@ class TlsClient extends events {
     this.taskIdField = '_taskId';
     this.host = props.host || '127.0.0.1';
     this.port = props.port || 80;
-    this.ca = props.caPath;
-    this.key = props.keyPath;
-    this.cert = props.certPath;
+    this.ca = props.ca;
+    this.key = props.key;
+    this.cert = props.cert;
     this.taskId = 0;
     this.taskIdLimit = 65536;
 
@@ -41,7 +41,7 @@ class TlsClient extends events {
     // process.stdin.pipe(socket);
     this.socket.on('secureConnect', () => {console.log('successfully connected')});
     this.socket.on('data', this._parseDataFromServer.bind(this));
-    this.socket.on('error', err => console.log('err', err));
+    this.socket.on('error', err => console.error('Error on client', err));
     this.socket.on('close', async () => {
       this._flushAllTasks();
       await this._delay(5 * 1000);
