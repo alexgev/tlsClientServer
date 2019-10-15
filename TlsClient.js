@@ -9,15 +9,15 @@ const events = require('events');
 
 class TlsClient extends events {
   constructor(props = {}) {
-    if (!props.caPath || !props.keyPath || !props.certPath) throw new Error('caPath, keyPath and certPath is required');
+    if (!props.ca || !props.key || !props.cert) throw new Error('ca, key and cert is required');
     super();
     this._eol = '\n';
     this.taskIdField = '_taskId';
     this.host = props.host || '127.0.0.1';
     this.port = props.port || 80;
-    this.ca = fs.readFileSync(props.caPath);
-    this.key = fs.readFileSync(props.keyPath);
-    this.cert = fs.readFileSync(props.certPath);
+    this.ca = props.caPath;
+    this.key = props.keyPath;
+    this.cert = props.certPath;
     this.taskId = 0;
     this.taskIdLimit = 65536;
 
