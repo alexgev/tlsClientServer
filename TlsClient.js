@@ -1,5 +1,4 @@
 const tls = require('tls');
-const fs = require('fs');
 const events = require('events');
 
 // const keyPath = `../certs/client.key`;
@@ -12,14 +11,16 @@ class TlsClient extends events {
     if (!props.ca || !props.key || !props.cert) throw new Error('ca, key and cert is required');
     super();
     this._eol = '\n';
-    this.taskIdField = '_taskId';
+    this._taskIdField = props.taskIdField || '_taskId';
     this.host = props.host || '127.0.0.1';
     this.port = props.port || 80;
+    this._dataField = 'payload';
+    this._eventKey = 'taskId';
     this.ca = props.ca;
     this.key = props.key;
     this.cert = props.cert;
-    this.taskId = 0;
-    this.taskIdLimit = 65536;
+    this._taskId = 0;
+    this._taskIdLimit = 65536;
 
     this._initConnection();
   }
@@ -78,7 +79,7 @@ class TlsClient extends events {
 
   async _sendDataMessage(data) {
     let obj = {
-      data: data
+      [this._dataField]: data
     };
     let {message, taskId} = this._formatDataToSend(obj);
     this.socket.write(message);
@@ -88,22 +89,22 @@ class TlsClient extends events {
 
   _formatDataToSend(data) {
     let objToSend = data || {};
-    const taskId = this.getNewTaskId();
-    objToSend[this.taskIdField] = taskId;
+    const taskId = this._getNewTaskId();
+    objToSend[this._taskIdField] = taskId;
     return {message: `${JSON.stringify(objToSend)}${this._eol}`, taskId};
   }
-  getNewTaskId() {
-    return ++this.taskId % this.taskIdLimit;
+  _getNewTaskId() {
+    return ++this._taskId % this._taskIdLimit;
   }
   _getTaskIdFromObj(obj) {
     if (!obj) throw new Error('Obj is required');
-    return obj[this.taskIdField];
+    return obj[this._taskIdField];
   }
   async _createTaskListener(taskId) {
     return await Promise.race([
       new Promise(res => {
         this.tasksSet.add(taskId);
-        this.once(`taskId:${taskId}`, res)
+        this.once(`${this._eventKey}:${taskId}`, res)
       }),
       this._delay(20 * 1000, true)
     ])
@@ -112,7 +113,7 @@ class TlsClient extends events {
   _emitTaskComplete(taskId, result) {
     console.log(`success taskId with result ${taskId}`, result);
     this.tasksSet.delete(taskId);
-    this.emit(`taskId:${taskId}`, result);
+    this.emit(`${this._eventKey}:${taskId}`, result);
   }
 
   async _delay(ms, throwTimeoutError, timeoutMessage = 'My timeout error') {
@@ -127,14 +128,5 @@ class TlsClient extends events {
     return await this._sendDataMessage(data);
   }
 }
-
-// const tlsClient = new TlsClient({host: '127.0.0.1', port: 8000, keyPath, certPath, caPath});
-//
-// ;(async () => {
-//   // for (let i = 0; i < 100000; i++) {
-//   //   tlsClient.sendData({hello: 'bla'});
-//   // }
-//    await tlsClient.sendData({hello: 'bla'});
-// })();
 
 module.exports = TlsClient;

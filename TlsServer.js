@@ -1,23 +1,17 @@
-const fs = require('fs');
 const tls = require('tls');
-// const port = 8000 || process.env.PORT;
-
-// const keyPath = '../certs/server1.key';
-// const certPath = '../certs/server1.crt';
-// const caPath = '../certs/ca.pem';
 
 class TlsServer extends tls.Server {
   constructor(...props) {
     super(...props);
     this._eol = '\n';
-    this._taskIdField = '_taskId';
+    this._taskIdField = props.taskIdField ||  '_taskId';
     this._methodField = 'method';
-    this._dataField = 'data';
+    this._dataField = 'payload';
+    this._methodParamsField = 'data';
     this._routeMap = new Map();
     this.on('secureConnection', (socket) => {
       console.log('connected');
       this.listeningFunc(socket);
-      // socket.write('hello\n');
     })
     this.on('error', err => console.error('Error on server', err));
   }
@@ -26,7 +20,6 @@ class TlsServer extends tls.Server {
   }
 
   async _parseDataFromClient(socket, buff) {
-    // console.log('getCipher()', socket.getCipher());
     let str = buff.toString();
     let obj = {};
     let jsons = str.split(this._eol);
@@ -38,11 +31,12 @@ class TlsServer extends tls.Server {
         console.log('objFromReq', obj);
         if (!obj[this._taskIdField]) return this._badRequest(socket);
         const taskId = this._getTaskIdFromObj(obj);
-        if (!obj[this._methodField]) return this._badRequest(socket, taskId);
-        const routePath = obj[this._methodField];
+        if (!obj[this._dataField]) return this._badRequest(socket, taskId, `${this._dataField} is required`);
+        const payload = obj[this._dataField];
+        const routePath = payload[this._methodField];
         let routeFunc = this._routeMap.get(routePath);
         if (!routeFunc) return this._badRequest(socket, taskId, `Not found "${routePath}" in routes`);
-        let data = obj[this._dataField];
+        let data = payload[this._methodParamsField];
         let result = await routeFunc(data);
         this._sendDataMessage(socket, taskId, result);
       } catch (e) {
@@ -97,12 +91,3 @@ class TlsServer extends tls.Server {
 }
 
 module.exports = TlsServer;
-// const options = {
-//   key: fs.readFileSync(keyPath),
-//   cert: fs.readFileSync(certPath),
-//   ca: fs.readFileSync(caPath),
-//   requestCert: true,
-//   rejectUnauthorized: true
-// };
-// const tlsServer = new TlsServer(options);
-// tlsServer.listen(port, () => console.log(`bound on port ${port}`));
