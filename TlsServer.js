@@ -10,7 +10,10 @@ class TlsServer extends tls.Server {
   constructor(...props) {
     super(...props);
     this._eol = '\n';
-    this.taskIdField = '_taskId';
+    this._taskIdField = '_taskId';
+    this._methodField = 'method';
+    this._dataField = 'data';
+    this._routeMap = new Map();
     this.on('secureConnection', (socket) => {
       console.log('connected');
       this.listeningFunc(socket);
@@ -22,7 +25,7 @@ class TlsServer extends tls.Server {
     socket.on('data', (data) => this._parseDataFromClient(socket, data));
   }
 
-  _parseDataFromClient(socket, buff) {
+  async _parseDataFromClient(socket, buff) {
     // console.log('getCipher()', socket.getCipher());
     let str = buff.toString();
     let obj = {};
@@ -33,8 +36,14 @@ class TlsServer extends tls.Server {
         if (!json) continue;
         obj = JSON.parse(json);
         console.log('objFromReq', obj);
-        if (!obj[this.taskIdField]) return this._badRequest(socket);
-        this._sendDataMessage(socket, this._getTaskIdFromObj(obj), 'success');
+        if (!obj[this._taskIdField] || !obj[this._methodField]) return this._badRequest(socket);
+        const taskId = this._getTaskIdFromObj(obj);
+        const routePath = obj[this._methodField];
+        let routeFunc = this._routeMap.get(routePath);
+        if (!routeFunc) return this._badRequest(socket, taskId, `Not found "${routePath}" in routes`);
+        let data = obj[this._dataField];
+        let result = await routeFunc(data);
+        this._sendDataMessage(socket, taskId, result);
       } catch (e) {
         this._sendErrorMessage(socket, this._getTaskIdFromObj(obj), e);
       }
@@ -43,7 +52,7 @@ class TlsServer extends tls.Server {
 
   _getTaskIdFromObj(obj) {
     if (!obj || typeof obj !== 'object') throw new Error('Obj must be and object');
-    return obj[this.taskIdField];
+    return obj[this._taskIdField];
   }
 
 
@@ -73,6 +82,16 @@ class TlsServer extends tls.Server {
     let objToSend = data || {};
     if (Number.isInteger(taskId)) objToSend._taskId = taskId;
     return `${JSON.stringify(objToSend)}${this._eol}`;
+  }
+
+  addRoute(route, func) {
+    if (this._routeMap.has(route)) throw new Error(`Server already have route "${route}"`);
+    this._routeMap.set(route, func);
+  }
+
+  deleteRoute(route) {
+    if (!route) throw new Error('Route is required');
+    return this._routeMap.delete(route);
   }
 }
 
