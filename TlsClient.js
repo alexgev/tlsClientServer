@@ -40,9 +40,9 @@ class TlsClient extends events {
     const socket = tls.connect(options);
     this.socket = socket;
     // process.stdin.pipe(socket);
-    this.socket.on('secureConnect', () => {console.log('successfully connected')});
+    // this.socket.on('secureConnect', () => {console.log('successfully connected')});
     this.socket.on('data', this._parseDataFromServer.bind(this));
-    this.socket.on('error', err => console.error('Error on client', err));
+    // this.socket.on('error', err => console.error('Error on client', err));
     this.socket.on('close', async () => {
       this._flushAllTasks();
       await this._delay(5 * 1000);
@@ -68,6 +68,7 @@ class TlsClient extends events {
       try {
         obj = JSON.parse(json);
         let taskId = this._getTaskIdFromObj(obj);
+        this._deleteTaskIdFromObj(obj);
         this._emitTaskComplete(taskId, obj);
       } catch (e) {
         console.log('e', e);
@@ -111,7 +112,6 @@ class TlsClient extends events {
   }
 
   _emitTaskComplete(taskId, result) {
-    console.log(`success taskId with result ${taskId}`, result);
     this.tasksSet.delete(taskId);
     this.emit(`${this._eventKey}:${taskId}`, result);
   }
@@ -120,6 +120,11 @@ class TlsClient extends events {
     return await new Promise((res, rej) =>
       (throwTimeoutError) ? setTimeout(rej, ms, timeoutMessage) : setTimeout(res, ms)
     );
+  }
+
+  _deleteTaskIdFromObj(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    delete obj[this._taskIdField];
   }
 
   async sendData(data) {

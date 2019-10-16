@@ -10,10 +10,10 @@ class TlsServer extends tls.Server {
     this._methodParamsField = 'data';
     this._routeMap = new Map();
     this.on('secureConnection', (socket) => {
-      console.log('connected');
+      // console.log('connected');
       this.listeningFunc(socket);
     })
-    this.on('error', err => console.error('Error on server', err));
+    // this.on('error', err => console.error('Error on server', err));
   }
   listeningFunc(socket) {
     socket.on('data', (data) => this._parseDataFromClient(socket, data));
@@ -28,7 +28,6 @@ class TlsServer extends tls.Server {
         let json = jsons[i];
         if (!json) continue;
         obj = JSON.parse(json);
-        console.log('objFromReq', obj);
         if (!obj[this._taskIdField]) return this._badRequest(socket);
         const taskId = this._getTaskIdFromObj(obj);
         if (!obj[this._dataField]) return this._badRequest(socket, taskId, `${this._dataField} is required`);

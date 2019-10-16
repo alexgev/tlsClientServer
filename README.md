@@ -126,17 +126,21 @@ let clientOptions = {
   host: '127.0.0.1'
 }
 let tlsClient = new TlsClient(clientOptions);
-
+tlsClient.socket.on('secureConnect', () => {console.log('successfully connected')});
 
 ;(async () => {
   /**
-   * Define route on server
-   */
+    * Define route on server
+    */
   tlsServer.addRoute('testRoute', (props) => props.a + props.b);
   /**
    * Call method from client and get result
    */
-  let result = await tlsClient.sendData({method: 'testRoute', data: {a: 1, b: 2}});
+  let result = await tlsClient.sendData({method: 'testRoute', data: {a: 12, b: 2}});
+  /**
+   * result = {data: 14}
+   * if an error will occur result = {error: String}
+   */
   console.log('result', result);
 })();
 
