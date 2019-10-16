@@ -115,13 +115,10 @@ let tlsServer = new TlsServer(serverOptions);
 tlsServer.listen(port, () => {console.log('bound')});
 
 
-const keyPath = `./examplesCerts/client.key`;
-const certPath = `./examplesCerts/client.crt`;
-const caPath = `./examplesCerts/ca.pem`;
 let clientOptions = {
-  key: fs.readFileSync(keyPath),
-  cert: fs.readFileSync(certPath),
-  ca: fs.readFileSync(caPath),
+  key: fs.readFileSync(`./examplesCerts/client.key`),
+  cert: fs.readFileSync(`./examplesCerts/client.crt`),
+  ca: fs.readFileSync(`./examplesCerts/ca.pem`),
   port: port,
   host: '127.0.0.1'
 }
