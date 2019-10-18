@@ -1,7 +1,7 @@
 # tlsClientServer
 Node js TLS Server and Client
 
-Certificate generation (NOT FOR PRODUCTION USE)
+Certificate generation
 
 - Create folder
 ```bash
